@@ -11,7 +11,6 @@ import {useNavigate} from "react-router-dom";
 function Payment() {
     const history=useNavigate();
     const [{ basket }, dispatch] = useStateValue();
-    console.log(basket)
     const [data, setData] = useState("");
     let sign = JSON.parse(localStorage.getItem('data1'));
     const order = async () => {
@@ -88,7 +87,7 @@ function Payment() {
                         {basket.map(item => (
                             <FinalView id={item.pid}
                                 title={item.pname}
-                                image={item.pimage}
+                                image={item.imageUrl ? item.imageUrl : item.pimage}
                                 price={item.pprice}
                                 rating={item.prating}
                             />

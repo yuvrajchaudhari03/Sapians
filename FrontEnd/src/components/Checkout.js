@@ -1,13 +1,11 @@
 import React from 'react'
-import '../Checkout.css'
-import baner from '../Ad.png'
-import Subtotal from './Subtotal'
-import { useStateValue } from './Stateprovider'
-import CheckoutProduct from './CheckoutProduct.js'
+import '../Checkout.css';
+import Subtotal from './Subtotal';
+import {useStateValue} from './Stateprovider';
+import CheckoutProduct from './CheckoutProduct.js';
 
 function Checkout() {
   const [{ basket }] = useStateValue()
-  console.log(basket)
   let sign = JSON.parse(localStorage.getItem('data1'))
   return (
     <div className="checkout">
