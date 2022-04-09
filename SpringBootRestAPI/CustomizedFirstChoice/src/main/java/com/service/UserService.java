@@ -1,24 +1,46 @@
 package com.service;
 
 
+import com.entities.Role;
+import com.models.GiveAuthorityModel;
+import com.repository.RoleRepository;
 import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.entities.User;
 import com.repository.UserRepository;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 @Service
-public class UserService
+public class UserService implements UserDetailsService
 {
 	@Autowired
 	private UserRepository userrepo;
+
+	@Autowired
+	private RoleRepository roleRepo;
 
 	//register
 	public User registerUser(User user) 
 	{
 		// TODO Auto-generated method stub
-			return userrepo.save(user);
+		userrepo.save(user);
+		if(user.getRoles()==null || user.getRoles().size()==0){
+			Role userRole = new Role();
+			userRole.setName("USER");
+			userRole.setUser(user);
+			user.addRole(userRole);
+			roleRepo.save(userRole);
+		}
+		return user;
 	}
 
 	public User getUserById(int id)
@@ -91,5 +113,37 @@ public class UserService
 		// TODO Auto-generated method stub
 		return userrepo.findAll();
 	}
+
+	@Override
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+		User user = userrepo.findByEmailAddress(email);
+		if(user == null)
+			throw new UsernameNotFoundException(email + " not found.");
+		return new org.springframework.security.core.userdetails.User(user.getU_email(), user.getU_password(), getGrantedAuthority(user));
+	}
+
+	private Collection<GrantedAuthority> getGrantedAuthority(User user){
+		Collection<GrantedAuthority> authorities = new ArrayList<>();
+		for(Role role: user.getRoles()){
+			authorities.add(new SimpleGrantedAuthority(role.getName()));
+		}
+		return authorities;
+	}
+
+	public boolean giveAuthority(GiveAuthorityModel giveAuthorityModel) throws Exception {
+		User user = userrepo.getById(giveAuthorityModel.getAuthorityTo());
+		for (Role role : user.getRoles())
+			if(role.getName().equalsIgnoreCase(giveAuthorityModel.getAuthority()))
+				throw new Exception("User already has the Authority.");
+
+		Role role = new Role();
+		role.setUser(user);
+		role.setName(giveAuthorityModel.getAuthority());
+
+		user.addRole(role);
+		userrepo.save(user);
+		return true;
+	}
+
 }
 

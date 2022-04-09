@@ -15,5 +15,6 @@ public interface UserRepository extends JpaRepository<User, Integer>
 {
 	@Query(value="select * from User  WHERE u_email=? AND u_password=?",nativeQuery = true)
 	User findByEmail(String u_email, String u_password);
-
+	@Query(value="select * from User  WHERE u_email=?",nativeQuery = true)
+    User findByEmailAddress(String email);
 }

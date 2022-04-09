@@ -2,10 +2,12 @@ package com.controller;
 
 import java.util.List;
 
+import com.models.GiveAuthorityModel;
 import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,26 +32,20 @@ public class UserController
 	 
 	
 	@PostMapping("/adduser")
-	public User registerUser(@RequestBody User user)
-	{
+	public User registerUser(@RequestBody User user) {
 		return userservice.registerUser(user);
 	
 	}
 
 	@GetMapping("/{id}")
-	public User getUser(@PathVariable("id") int id)
-	{
+	public User getUser(@PathVariable("id") int id) {
 		return userservice.getUserById(id);
-
 	}
-	
-	@PostMapping("/loginuser")
-	//public ResponseEntity<User> loginUser(@RequestBody User user)
-	public ResponseEntity loginUser(@RequestBody User user) throws AuthenticationException {
-		User foundUser = userservice.loginUser(user);
-		if(foundUser!=null)
-			return new ResponseEntity<>(foundUser, HttpStatus.OK);
-		return new ResponseEntity<>("Wrong Username and Password", HttpStatus.FORBIDDEN);
+
+	@PostMapping("/login")
+	public ResponseEntity login(){
+		String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+		return new ResponseEntity(currentUser + " Logged In", HttpStatus.OK);
 	}
 	
 	@PutMapping("/updateuser")
@@ -65,7 +61,7 @@ public class UserController
 	}
 
 
-	@DeleteMapping("/deleteuser/{u_id}")
+	@DeleteMapping("/{u_id}")
 	public Boolean deleteUser(@PathVariable int u_id)
 	{
 		boolean value=userservice.deleteUser(u_id);
@@ -73,19 +69,28 @@ public class UserController
 			return true;
 		else
 			return false;
-	}//Ok
-	
-	@GetMapping("/getuser/{u_id}")
-	public User singleUser(@PathVariable int u_id)
-	{
-		return userservice.singleUser(u_id);
-	}//Ok
-	
+	}
+
 	@GetMapping("/getalluser")
 	public List<User> allUser()
 	{
 		return userservice.allUser();
 	}//Ok
-	
+
+	@PostMapping("/giveAuthority")
+	public ResponseEntity giveAuthority(@RequestBody GiveAuthorityModel giveAuthority){
+		try {
+			userservice.giveAuthority(giveAuthority);
+		} catch (Exception e) {
+			return new ResponseEntity(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+		}
+		return new ResponseEntity("Authority Given", HttpStatus.OK);
+	}
+
+	@GetMapping("/my_profile")
+	public ResponseEntity getCurrentProfile(){
+		String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+		return new ResponseEntity(userservice.loadUserByUsername(currentUser), HttpStatus.OK);
+	}
 	 
 }

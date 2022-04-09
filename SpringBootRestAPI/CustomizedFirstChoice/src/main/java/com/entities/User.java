@@ -1,9 +1,11 @@
 package com.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Table
 @Entity
@@ -21,7 +23,13 @@ public class User {
 	private String u_email;
 	private String u_password;
 	private float wallet=2000f;
-	
+
+	/*This is Bidirectional Approch: i.e. In User, will have filed named roles. And in Role, we will have field named User */
+	/*mappedBy - Tell hibernate which table ownes the relationship    */
+	@JsonIgnore
+	@OneToMany(mappedBy = "user",cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+	private List<Role> roles = new ArrayList<>();
+
 	public User() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -81,7 +89,7 @@ public class User {
 	}
 
 	public void setU_password(String u_password) {
-		this.u_password = u_password;
+		this.u_password = new BCryptPasswordEncoder().encode(u_password);
 	}
 
 	@Override
@@ -122,7 +130,18 @@ public class User {
 	public void setU_fname(String u_fname) {
 		this.u_fname = u_fname;
 	}
-	
-	
-	
+
+	public List<Role> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<Role> roles) {
+		this.roles = roles;
+	}
+
+	public void addRole(Role role) {
+		if(this.roles == null)
+			this.roles = new ArrayList<>();
+		this.roles.add(role);
+	}
 }

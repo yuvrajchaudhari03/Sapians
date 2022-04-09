@@ -26,6 +26,7 @@ public class MyOrder {
 	private User user;
 
 	@OneToMany(mappedBy = "order")
+//	MyOrderProductMapping - >
 	private List<MyOrderProductMapping> productAssoc;
 
 	public MyOrder() {
