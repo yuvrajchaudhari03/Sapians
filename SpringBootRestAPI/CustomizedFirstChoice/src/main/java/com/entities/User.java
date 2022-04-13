@@ -1,6 +1,7 @@
 package com.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
@@ -21,12 +22,15 @@ public class User {
 	private String u_phone;
 	private String u_address;
 	private String u_email;
+
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String u_password;
 	private float wallet=2000f;
+	private boolean status=false;
 
 	/*This is Bidirectional Approch: i.e. In User, will have filed named roles. And in Role, we will have field named User */
 	/*mappedBy - Tell hibernate which table ownes the relationship    */
-	@JsonIgnore
+//	@JsonIgnore
 	@OneToMany(mappedBy = "user",cascade=CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<Role> roles = new ArrayList<>();
 
@@ -143,5 +147,13 @@ public class User {
 		if(this.roles == null)
 			this.roles = new ArrayList<>();
 		this.roles.add(role);
+	}
+
+	public boolean isStatus() {
+		return status;
+	}
+
+	public void setStatus(boolean status) {
+		this.status = status;
 	}
 }

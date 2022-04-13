@@ -4,10 +4,12 @@ package com.service;
 import com.entities.Role;
 import com.models.GiveAuthorityModel;
 import com.repository.RoleRepository;
-import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.entities.User;
 import com.repository.UserRepository;
 
+import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -31,29 +34,12 @@ public class UserService implements UserDetailsService
 	//register
 	public User registerUser(User user) 
 	{
-		// TODO Auto-generated method stub
 		userrepo.save(user);
-		if(user.getRoles()==null || user.getRoles().size()==0){
-			Role userRole = new Role();
-			userRole.setName("USER");
-			userRole.setUser(user);
-			user.addRole(userRole);
-			roleRepo.save(userRole);
-		}
 		return user;
 	}
 
-	public User getUserById(int id)
-	{
-		// TODO Auto-generated method stub
-		return userrepo.findById(id).get();
-	}
-
-	//login
 	public User loginUser(User user) {
-		// TODO Auto-generated method stub
-		
-		User user1=userrepo.findByEmail(user.getU_email(),user.getU_password());
+		User user1=userrepo.authenticateUser(user.getU_email(),user.getU_password());
 		
 		if(user1!=null && user1.getU_email().equals(user.getU_email())&& user1.getU_password().equals(user.getU_password()))
 			return user1 ;
@@ -61,10 +47,7 @@ public class UserService implements UserDetailsService
 			return null;
 	}
 
-
-	//update
 	public User addWalletMoney(User user) {
-		// TODO Auto-generated method stub
 		User existinguser;
 		existinguser=userrepo.findById(user.getU_id()).orElse(null);
 		if(existinguser != null) {
@@ -74,36 +57,39 @@ public class UserService implements UserDetailsService
 		return userrepo.save(existinguser);
 	}
 
-
-
-	//update
-	public User updateUser(User user) {
-		// TODO Auto-generated method stub
-		User existinguser;
-		existinguser=userrepo.findById(user.getU_id()).orElse(null);
-		if(existinguser != null) {
-			existinguser.setU_fname(user.getU_fname());
-			existinguser.setU_lname(user.getU_lname());
-			existinguser.setU_phone(user.getU_phone());
-			existinguser.setU_email(user.getU_email());
-			existinguser.setU_password(user.getU_password());
-			existinguser.setU_address(user.getU_address());
-		}
-		
-		return userrepo.save(existinguser);
-	}
-
-
 	public boolean deleteUser(int u_id) {
-		// TODO Auto-generated method stub
-		
 		userrepo.deleteById(u_id);
 		return true;
 		
 	}
 
+	public User getUser(String email) {
+		// TODO Auto-generated method stub
+		return userrepo.findByEmailAddress(email);
+	}
 
-	public User singleUser(int u_id) {
+	public User updateUser(User user) throws UsernameNotFoundException {
+		String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+		if(currentUserEmail == null){
+			throw new UsernameNotFoundException("Please Login first...!!!");
+		}
+		User existing  = this.getUser(currentUserEmail);
+
+		if(user.getU_address() != null)
+			existing.setU_address(user.getU_address());
+		if(user.getU_fname() != null)
+			existing.setU_fname(user.getU_fname());
+		if(user.getU_lname() != null)
+			existing.setU_lname(user.getU_lname());
+		if(user.getU_phone() != null)
+			existing.setU_phone(user.getU_phone());
+		if(user.getU_password() != null)
+			existing.setU_password(user.getU_password());
+
+		return this.userrepo.save(existing);
+	}
+
+	public User getUser(int u_id) {
 		// TODO Auto-generated method stub
 		return userrepo.findById(u_id).orElse(null);
 	}
@@ -144,6 +130,16 @@ public class UserService implements UserDetailsService
 		userrepo.save(user);
 		return true;
 	}
+
+	public User approveVendor(int v_id, Boolean v_status) {
+		User user = userrepo.findById(v_id).orElse(null);
+		if(user!= null){
+			user.setStatus(v_status);
+			return userrepo.save(user);
+		}
+		return null;
+	}
+
 
 }
 
