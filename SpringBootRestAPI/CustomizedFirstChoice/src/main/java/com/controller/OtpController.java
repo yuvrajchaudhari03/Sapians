@@ -1,34 +1,32 @@
 package com.controller;
 
 import com.constants.SecurityConstants;
+import com.entities.Role;
 import com.entities.User;
 import com.service.*;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.crypto.SecretKey;
 import javax.mail.MessagingException;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.util.*;
 
 @Controller
 public class OtpController {
 
     @Autowired
-    public OtpService otpService;
+    public GenerateOTPService generateOTPService;
 
     @Autowired
-    public EmailService emailService;
+    public SendMessageService sendEmailMessageService;
+
+    @Autowired
+    public SendMessageService sendTextMessageService;
 
     @Autowired
     public UserService userService;
@@ -37,27 +35,28 @@ public class OtpController {
     public LoginService loginService;
 
     @GetMapping("/generateOtp/{id}")
-    public ResponseEntity generateOTP(@PathVariable String id) throws MessagingException {
+    public ResponseEntity generateOTP(@PathVariable String id) throws MessagingException, IOException {
         String username = null;
-        if(id.endsWith(".com")){
-            try {
-                username = userService.loadUserByUsername(id).getUsername();
-            }
-            catch (Exception ex){
-                System.out.println("Its a new User");
-            }
+        try {
+            username = userService.loadUserByUsername(id).getUsername();
         }
-        else{
-            return new ResponseEntity("Only email verification is supported", HttpStatus.FORBIDDEN);
+        catch (Exception ex){
+            System.out.println("Its a new User");
         }
-        int otp = otpService.generateOTP(id);
+
+        int otp = generateOTPService.generateOTP(id);
         EmailTemplate template = new EmailTemplate("SendOtp.html");
         Map<String, String> replacements = new HashMap<>();
         replacements.put("user", id);
         replacements.put("otpnum", String.valueOf(otp));
         String message = template.getTemplate(replacements);
 
-        emailService.sendOtpMessage(id, "OTP - Sapien", message);
+        if(StringUtils.containsIgnoreCase(id,".co")){
+            sendEmailMessageService.sendOtpMessage(id, "OTP - Sapien", message);
+        }
+        else {
+            sendTextMessageService.sendOtpMessage(id, "OTP - Sapien", message);
+        }
 
         return new ResponseEntity("OTP Send Succesfully", HttpStatus.OK);
     }
@@ -78,10 +77,10 @@ public class OtpController {
                 return new ResponseEntity("User not found", HttpStatus.NOT_FOUND);
             }
 
-            int serverOtp = otpService.getOtp(id);
+            int serverOtp = generateOTPService.getOtp(id);
             if(serverOtp > 0){
                 if(otpnum == serverOtp){
-                    otpService.clearOTP(id);
+                    generateOTPService.clearOTP(id);
                     String jwt=null;
                     if(userDetails != null){
                         jwt= loginService.login(userDetails);
@@ -89,8 +88,14 @@ public class OtpController {
                     else{
                         User user = new User();
                         user.setU_email(id);
+                        Role userRole = new Role();
+                        userRole.setName(Role.USER);
+                        userRole.setUser(user);
+                        user.setRoles(new ArrayList<Role>(Collections.singleton(userRole)));
                         userService.registerUser(user);
-                        return new ResponseEntity(user.getU_id(), HttpStatus.OK);
+
+                        jwt= loginService.loginWithoutPassword(id, user.getRoles());
+                        return ResponseEntity.ok().header(SecurityConstants.JWT_HEADER, jwt).body(user.getU_id());
                     }
 
                     if(jwt != null)

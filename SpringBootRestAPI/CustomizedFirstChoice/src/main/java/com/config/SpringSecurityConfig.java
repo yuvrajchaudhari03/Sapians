@@ -1,5 +1,6 @@
 package com.config;
 
+import com.entities.Role;
 import com.filter.JWTTokenGeneratorFilter;
 import com.filter.JWTTokenValidatorFilter;
 import com.service.UserService;
@@ -58,15 +59,17 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
 				.addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
+                .anonymous().and()
                 .authorizeRequests()
-                .antMatchers("/user/adduser").permitAll()
-                .antMatchers(HttpMethod.GET, "/user").hasAuthority("ADMIN")
+                .antMatchers(HttpMethod.POST,"/user").permitAll()
+                .antMatchers(HttpMethod.GET, "/user").hasAuthority(Role.ADMIN)
                 .antMatchers(HttpMethod.PUT, "/user").authenticated()
                 .antMatchers(HttpMethod.GET, "/user/my_profile").authenticated()
-                .antMatchers(HttpMethod.GET, "/user/*").hasAuthority("ADMIN")
-                .antMatchers(HttpMethod.POST, "/user/giveAuthority").hasAuthority("ADMIN")
+                .antMatchers(HttpMethod.GET, "/user/*").hasAuthority(Role.ADMIN)
+                .antMatchers(HttpMethod.POST, "/user/giveAuthority").hasAuthority(Role.ADMIN)
+                .antMatchers(HttpMethod.POST, "/user/vendor").authenticated()
                 .antMatchers(HttpMethod.POST, "/user/addMoney").authenticated()
-                .antMatchers(HttpMethod.DELETE, "/user/*").hasAuthority("ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/user/*").hasAuthority(Role.ADMIN)
                 .antMatchers("/contactUs").permitAll()
                 /*Requests that are not register here will be validated by JWT*/
                 .and().httpBasic()

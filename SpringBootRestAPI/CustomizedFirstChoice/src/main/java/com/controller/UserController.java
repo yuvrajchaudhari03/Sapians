@@ -26,20 +26,19 @@ public class UserController
 	 private UserService userservice;
 	 
 	
-	@PostMapping("/vendor")
-	public User registerVendor(@RequestBody User user) {
-		user.setStatus(false);
-		Role userRole = new Role();
-		userRole.setName("VENDOR");
-		userRole.setUser(user);
-		user.setRoles(new ArrayList<Role>(Collections.singleton(userRole)));
-		return userservice.registerUser(user);
+	@PostMapping("/vendor/{emailOrPhone}")
+	public ResponseEntity registerVendor(@PathVariable String emailOrPhone) throws Exception {
+		GiveAuthorityModel giveAuthorityModel = new GiveAuthorityModel();
+		giveAuthorityModel.setAuthority(Role.VENDOR);
+		giveAuthorityModel.setAuthorityToAsEmail(emailOrPhone);
+		userservice.giveAuthority(giveAuthorityModel);
+		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping
 	public User registerUser(@RequestBody User user) {
 		Role userRole = new Role();
-		userRole.setName("USER");
+		userRole.setName(Role.USER);
 		userRole.setUser(user);
 		user.setRoles(new ArrayList<Role>(Collections.singleton(userRole)));
 		return userservice.registerUser(user);
@@ -97,7 +96,7 @@ public class UserController
 	@GetMapping("/my_profile")
 	public ResponseEntity getCurrentProfile(){
 		String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
-		return new ResponseEntity(userservice.loadUserByUsername(currentUser), HttpStatus.OK);
+		return new ResponseEntity(userservice.loadUserByEmailOrPhone(currentUser), HttpStatus.OK);
 	}
 
 	@PatchMapping("/approve/{u_id}/{status}")

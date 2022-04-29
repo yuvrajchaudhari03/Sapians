@@ -9,10 +9,11 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 @Service
-public class EmailService {
+public class SendEmailMessageService implements SendMessageService {
     @Autowired
     private JavaMailSender javaMailSender;
 
+    @Override
     public void sendOtpMessage(String to, String subject, String message) throws MessagingException {
 
         MimeMessage msg = javaMailSender.createMimeMessage();

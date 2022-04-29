@@ -4,6 +4,7 @@ package com.service;
 import com.entities.Role;
 import com.models.GiveAuthorityModel;
 import com.repository.RoleRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -100,9 +101,24 @@ public class UserService implements UserDetailsService
 		return userrepo.findAll();
 	}
 
+	public User loadUserByEmailOrPhone(String emailOrPhone){
+		User user = null;
+		if(StringUtils.containsIgnoreCase(emailOrPhone,".co"))
+			user = userrepo.findByEmailAddress(emailOrPhone);
+		else
+			user = userrepo.findByPhoneNumber(emailOrPhone);
+		if(user == null)
+			throw new UsernameNotFoundException(emailOrPhone + " not found.");
+		return user;
+	}
+
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-		User user = userrepo.findByEmailAddress(email);
+		User user = null;
+		if(StringUtils.containsIgnoreCase(email,".co"))
+			user = userrepo.findByEmailAddress(email);
+		else
+			user = userrepo.findByPhoneNumber(email);
 		if(user == null)
 			throw new UsernameNotFoundException(email + " not found.");
 		return new org.springframework.security.core.userdetails.User(user.getU_email(), user.getU_password(), getGrantedAuthority(user));
@@ -117,7 +133,12 @@ public class UserService implements UserDetailsService
 	}
 
 	public boolean giveAuthority(GiveAuthorityModel giveAuthorityModel) throws Exception {
-		User user = userrepo.getById(giveAuthorityModel.getAuthorityTo());
+		User user = null;
+		if(StringUtils.isNotEmpty(giveAuthorityModel.getAuthorityToAsEmail()))
+			user = userrepo.findByEmailAddress(giveAuthorityModel.getAuthorityToAsEmail());
+		else
+			user = userrepo.getById(giveAuthorityModel.getAuthorityTo());
+
 		for (Role role : user.getRoles())
 			if(role.getName().equalsIgnoreCase(giveAuthorityModel.getAuthority()))
 				throw new Exception("User already has the Authority.");

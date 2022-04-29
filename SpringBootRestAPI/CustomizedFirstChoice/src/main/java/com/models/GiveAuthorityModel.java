@@ -3,6 +3,7 @@ package com.models;
 public class GiveAuthorityModel {
     private Integer authorityTo;
     private String authority;
+    private String authorityToAsEmail;
 
     public Integer getAuthorityTo() {
         return authorityTo;
@@ -18,5 +19,13 @@ public class GiveAuthorityModel {
 
     public void setAuthority(String authority) {
         this.authority = authority;
+    }
+
+    public String getAuthorityToAsEmail() {
+        return authorityToAsEmail;
+    }
+
+    public void setAuthorityToAsEmail(String authorityToAsEmail) {
+        this.authorityToAsEmail = authorityToAsEmail;
     }
 }

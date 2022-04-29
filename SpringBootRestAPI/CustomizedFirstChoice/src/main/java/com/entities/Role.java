@@ -7,6 +7,13 @@ import javax.persistence.*;
 @Entity
 @Table(name = "role")
 public class Role {
+    @Transient
+    public final static String VENDOR = "VENDOR";
+    @Transient
+    public final static String USER = "USER";
+    @Transient
+    public final static String ADMIN = "ADMIN";
+
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)

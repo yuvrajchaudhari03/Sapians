@@ -9,10 +9,10 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class OtpService {
-    private static final Integer EXPIRE_MINS = 1;
+public class GenerateOTPService {
+    private static final Integer EXPIRE_MINS = 5;
     private LoadingCache<String, Integer> otpCache;
-    public OtpService(){
+    public GenerateOTPService(){
         super();
         otpCache = CacheBuilder.newBuilder().
                 expireAfterWrite(EXPIRE_MINS, TimeUnit.MINUTES)

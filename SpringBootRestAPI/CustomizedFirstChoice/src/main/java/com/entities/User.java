@@ -10,7 +10,6 @@ import java.util.List;
 
 @Table
 @Entity
-
 public class User {
 
 	@Id
@@ -19,9 +18,14 @@ public class User {
 	
 	private String u_fname;
 	private String u_lname;
-	private String u_phone;
 	private String u_address;
+
+	@Column(name="u_email", unique=true)
 	private String u_email;
+
+	@Column(name="u_phone", unique=true)
+	private String u_phone;
+
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String u_password;
