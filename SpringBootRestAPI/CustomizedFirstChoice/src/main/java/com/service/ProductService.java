@@ -3,6 +3,8 @@ package com.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.entities.User;
+import com.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,8 @@ import com.repository.ProductRepository;
 public class ProductService {
 	@Autowired
 	ProductRepository prepo;
+	@Autowired
+	UserRepository userRepository;
 
 	public List<Product> getAllProducts() {
 		return prepo.findAll().stream().filter(e -> e.getPqty()>0).collect(Collectors.toList());
@@ -40,8 +44,8 @@ public class ProductService {
 	public List<Product> getAllStitched() {
 		return prepo.getAllStitched();
 	}
-	public List<Product> getByVid(int v_id) {
-		return prepo.getByVid(v_id);
+	public List<Product> getByVendor(int u_id) {
+		return prepo.getByVid(u_id);
 	}
 	public boolean productStatusAction(int p_id,float pprice,int pqty,String action) 
 	{
@@ -61,10 +65,11 @@ public class ProductService {
 		}
 		
 	}
-	public int vaddproduct(int c_id, int v_id, String pname, String pdesc, String psize, String pbrand, float pprice,
+	public int vaddproduct(int c_id, String v_email, String pname, String pdesc, String psize, String pbrand, float pprice,
 						   int pqty, String image_url) throws Exception {
 		try{
-			return prepo.vaddproduct(c_id,v_id,pname,pdesc,psize,pbrand,pprice*1.1f,pqty, image_url);
+			User user  = userRepository.findByEmailAddress(v_email);
+			return prepo.vaddproduct(c_id,user.getU_id(),pname,pdesc,psize,pbrand,pprice*1.1f,pqty, image_url);
 		}
 		catch (Exception ex){
 			throw new Exception("Adding product failed"+ ex.getMessage());

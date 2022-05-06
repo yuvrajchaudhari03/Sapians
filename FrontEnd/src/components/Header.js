@@ -15,6 +15,8 @@ import {
   Container,
 } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
+import httpService from '../services/httpService'
+import authService from '../services/authService'
 
 function Header() {
   const history = useNavigate()
@@ -22,11 +24,10 @@ function Header() {
   const [text, setText] = useState('')
   let textInput = React.createRef()
   localStorage.setItem('text', text)
-  //console.log(JSON.parse(localStorage.getItem('data1')));
-  let sign = JSON.parse(localStorage.getItem('data1'))
+  let sign = authService.getCurrentUser()
   let signOut = () => {
     if (sign != null) {
-      localStorage.removeItem('data1')
+      localStorage.removeItem('token')
       window.location.href = '/login'
     }
   }
@@ -35,9 +36,8 @@ function Header() {
     localStorage.setItem('searchText', textInput.current.value)
     // history('/search')
     history('/search', { state: textInput.current.value })
-
-    // localStorage.removeItem('text')
   }
+
   return (
     // <div className='header'>
     //     <Link to="/">

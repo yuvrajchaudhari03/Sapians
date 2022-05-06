@@ -44,10 +44,18 @@ public class UserController
 		return userservice.registerUser(user);
 	}
 
+	/*TODO For below two endpoints add auth as Admin bcz, Normal user can use my_profile endpoint instead of this*/
 	@GetMapping("/{id}")
 	public User getUser(@PathVariable("id") int id) {
 		return userservice.getUser(id);
 	}
+
+
+	@GetMapping("/{email}")
+	public User getUser(@PathVariable("email") String email) {
+		return userservice.getUser(email);
+	}
+
 
 	@PostMapping("/login")
 	public ResponseEntity login(){
@@ -62,9 +70,9 @@ public class UserController
 		return new ResponseEntity(updatedUser, HttpStatus.OK);
 	}
 
-	@PostMapping("/addMoney")
-	public User addMoneyToUserWallet(@RequestBody User user){
-		return userservice.addWalletMoney(user);
+	@PostMapping("/addMoney/{paymentDone}")
+	public User addMoneyToUserWallet(@PathVariable Integer paymentDone){
+		return userservice.addWalletMoney(paymentDone);
 	}
 
 	@DeleteMapping("/{u_id}")

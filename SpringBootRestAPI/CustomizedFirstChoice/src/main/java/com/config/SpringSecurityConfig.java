@@ -71,6 +71,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/user/addMoney").authenticated()
                 .antMatchers(HttpMethod.DELETE, "/user/*").hasAuthority(Role.ADMIN)
                 .antMatchers("/contactUs").permitAll()
+                .antMatchers(HttpMethod.GET,"/product/*").permitAll()
+                .antMatchers("/product/addproduct").hasAuthority(Role.VENDOR)
                 /*Requests that are not register here will be validated by JWT*/
                 .and().httpBasic()
                 /*This will add entrypoint(AuthenticationEntryPointConfig bean) and commence method will handle exception while authentication process.*/

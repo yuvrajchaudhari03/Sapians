@@ -1,6 +1,8 @@
 package com.filter;
 
 import com.constants.SecurityConstants;
+import com.entities.User;
+import com.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.apache.commons.lang3.StringUtils;
@@ -30,11 +32,18 @@ public class JWTTokenGeneratorFilter extends OncePerRequestFilter {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (null != authentication) {
             SecretKey key = Keys.hmacShaKeyFor(SecurityConstants.JWT_KEY.getBytes(StandardCharsets.UTF_8));
+
             String email = authentication.getName();
-//            String username = userService.getUserByEmail(email).getUsername();
+            String username = null;
+            Integer user_id = null;
+            if(authentication.getPrincipal() instanceof User){
+                username = ((User) authentication.getPrincipal()).getU_fname();
+                user_id = ((User) authentication.getPrincipal()).getU_id();
+            }
             String jwt = Jwts.builder().setIssuer("Sapien").setSubject("JWT Token")
                     .claim("u_email", email)
-//                    .claim("username", username)
+                    .claim("u_name", username)
+                    .claim("u_id", user_id)
                     .claim("authorities", populateAuthorities(authentication.getAuthorities()))
                     .setIssuedAt(new Date())
                     .setExpiration(new Date((new Date()).getTime() + 30000000))
