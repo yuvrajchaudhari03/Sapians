@@ -1,4 +1,29 @@
-admin create 
+Features:
+   - JWT token.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+admin create
 
 I manually added auto increament for product table
 
@@ -14,16 +39,6 @@ CHANGE COLUMN `o_id` `o_id` INT NOT NULL AUTO_INCREMENT ;
 ALTER TABLE `finalproject`.`myorder` 
 DROP COLUMN `qty`;
 
-
-
-
-
-User when buys, quantity of products available in staock not reducing
-
-
-Pending:
-All orders in Admin
-Images
 
 
 ngrok http -host-header=rewrite 3000

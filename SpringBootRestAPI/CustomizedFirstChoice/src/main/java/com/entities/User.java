@@ -1,14 +1,20 @@
 package com.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Table
 @Entity
-
-public class User {
+public class User implements UserDetails {
 
 	@Id
 	@GeneratedValue
@@ -16,24 +22,31 @@ public class User {
 	
 	private String u_fname;
 	private String u_lname;
-	private String u_phone;
 	private String u_address;
+
+	@Column(name="u_email", unique=true)
 	private String u_email;
+
+	@Column(name="u_phone", unique=true)
+	private String u_phone;
+
+
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String u_password;
 	private float wallet=2000f;
-	
+	private boolean status=false;
+
+	/*This is Bidirectional Approch: i.e. In User, will have filed named roles. And in Role, we will have field named User */
+	/*mappedBy - Tell hibernate which table ownes the relationship    */
+//	@JsonIgnore
+	@OneToMany(mappedBy = "user",cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+	private List<Role> roles = new ArrayList<>();
+
 	public User() {
-		super();
-		// TODO Auto-generated constructor stub
 	}
 
-	
-
-
-	public User(int u_id, String u_fname, String u_lname, String u_phone, String u_address, String u_email,
-			String u_password, float wallet) {
-		super();
-		this.u_id = u_id;
+	public User(String u_fname, String u_lname, String u_phone, String u_address, String u_email,
+			String u_password, float wallet, Collection<GrantedAuthority> authorities) {
 		this.u_fname = u_fname;
 		this.u_lname = u_lname;
 		this.u_phone = u_phone;
@@ -81,7 +94,7 @@ public class User {
 	}
 
 	public void setU_password(String u_password) {
-		this.u_password = u_password;
+		this.u_password = new BCryptPasswordEncoder().encode(u_password);
 	}
 
 	@Override
@@ -122,7 +135,69 @@ public class User {
 	public void setU_fname(String u_fname) {
 		this.u_fname = u_fname;
 	}
-	
-	
-	
+
+	public List<Role> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<Role> roles) {
+		this.roles = roles;
+	}
+
+	public void addRole(Role role) {
+		if(this.roles == null)
+			this.roles = new ArrayList<>();
+		this.roles.add(role);
+	}
+
+	public boolean isStatus() {
+		return status;
+	}
+
+	public void setStatus(boolean status) {
+		this.status = status;
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return getGrantedAuthority(roles);
+	}
+
+	@Override
+	public String getPassword() {
+		return u_password;
+	}
+
+	@Override
+	public String getUsername() {
+		return u_email;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
+
+	private Collection<GrantedAuthority> getGrantedAuthority(List<Role> roles){
+		Collection<GrantedAuthority> authorities = new ArrayList<>();
+		for(Role role: roles){
+			authorities.add(new SimpleGrantedAuthority(role.getName()));
+		}
+		return authorities;
+	}
 }

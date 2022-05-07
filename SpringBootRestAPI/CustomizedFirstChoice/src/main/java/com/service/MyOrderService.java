@@ -21,12 +21,6 @@ public class MyOrderService {
 	ProductRepository productRepo;
 
 	@Autowired
-	VendorRepository vendorRepo;
-
-	@Autowired
-	AdminRepository adminRepo;
-
-	@Autowired
 	MyOrderProductMappingRepository opMappingRepo;
 
 	@Autowired
@@ -75,10 +69,10 @@ public class MyOrderService {
 			productMap.put(product.getP_id(), product);
 		}
 
-		List<Vendor> allVendors = this.vendorRepo.findAll();
-		Map<Integer, Vendor> vendorMap = new HashMap();
-		for(Vendor vendor : allVendors){
-			vendorMap.put(vendor.getV_id(), vendor);
+		List<User> allVendors = this.userRepo.findAll();
+		Map<Integer, User> vendorMap = new HashMap();
+		for(User vendor : allVendors){
+			vendorMap.put(vendor.getU_id(), vendor);
 		}
 
 		for (OrderQuantity oq : mo.getProductsQuantity()){
@@ -98,10 +92,10 @@ public class MyOrderService {
 			opMappingRepo.save(myOrderProductMapping);
 			orderEntity.addProductAssoc(myOrderProductMapping);
 		}
-		Admin admin = adminRepo.findById(1).get();
-		float updatedAdminWallet = admin.getA_wallet() + (price*0.1f);
-		admin.setA_wallet(updatedAdminWallet);
-		adminRepo.save(admin);
+		User admin = userRepo.findById(1).get();
+		float updatedAdminWallet = admin.getWallet() + (price*0.1f);
+		admin.setWallet(updatedAdminWallet);
+		userRepo.save(admin);
 		return orderEntity;
 	}
 
@@ -116,11 +110,11 @@ public class MyOrderService {
 		return true;
 	}
 
-	private void calculateWalletForVendor(MyOrderProductMapping mapping, Map<Integer, Vendor> vendors){
+	private void calculateWalletForVendor(MyOrderProductMapping mapping, Map<Integer, User> vendors){
 		float totalPriceForProduct = mapping.getProduct().getPprice() * mapping.getQuantity();
-		Vendor requiredVendor = vendors.get(mapping.getProduct().getVdr().getV_id());
-		float updatedVendorWallet = requiredVendor.getV_wallet() + totalPriceForProduct*0.9f;
-		requiredVendor.setV_wallet(updatedVendorWallet);
+		User requiredVendor = vendors.get(mapping.getProduct().getVdr().getU_id());
+		float updatedVendorWallet = requiredVendor.getWallet() + totalPriceForProduct*0.9f;
+		requiredVendor.setWallet(updatedVendorWallet);
 	}
 
 	private boolean calculateAvailableProductQuantity(MyOrderProductMapping mapping){

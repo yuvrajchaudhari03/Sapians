@@ -23,12 +23,12 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 	@Query(value = "select * from product where c_id in(select c_id from category where c_type='STITCHED')", nativeQuery = true)
 	public List<Product> getAllStitched();
 
-	@Query(value = "select * from product where v_id =?1", nativeQuery = true)
-	public List<Product> getByVid(int v_id);
+	@Query(value = "select * from product where u_id =?1", nativeQuery = true)
+	public List<Product> getByVid(int u_id);
 
 
-	@Query(value = "select * from product where v_id =?1", nativeQuery = true)
-	public List<Product> search(int v_id);
+	@Query(value = "select * from product where u_id =?1", nativeQuery = true)
+	public List<Product> search(int u_id);
 
 	@Modifying
 	@Query(value = "delete from productaudit where pid=?1", nativeQuery = true)
@@ -46,12 +46,12 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 	public int cidReturn(String c_type, String c_name);
 
 	@Modifying
-	@Query(value = "insert into product(c_id,v_id,pname,pdesc,psize,pbrand,pprice,pqty,prating,image_url)	values(?1,?2,?3,?4,?5,?6,?7,?8,3,?9)", nativeQuery = true)
-	public int vaddproduct(int c_id, int v_id, String pname, String pdesc, String psize, String pbrand, float pprice,
+	@Query(value = "insert into product(c_id,u_id,pname,pdesc,psize,pbrand,pprice,pqty,prating,image_url)	values(?1,?2,?3,?4,?5,?6,?7,?8,3,?9)", nativeQuery = true)
+	public int vaddproduct(int c_id, int u_id, String pname, String pdesc, String psize, String pbrand, float pprice,
 						   int pqty, String image_url);
 
-	@Query(value = "select * from product where pqty=0 AND v_id=?1", nativeQuery = true)
-	public List<Product> viewOutOfStock(int v_id);
+	@Query(value = "select * from product where pqty=0 AND u_id=?1", nativeQuery = true)
+	public List<Product> viewOutOfStock(int u_id);
 
 	@Query(value = "select * from product where p_id=?1", nativeQuery = true)
 	public List<Product> getproducts(int p_id);

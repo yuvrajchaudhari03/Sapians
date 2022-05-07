@@ -37,9 +37,9 @@ public class Product {
 	private Category cat;
 
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "v_id")
+	@JoinColumn(name = "u_id")
 	@JsonProperty(access = Access.WRITE_ONLY)
-	private Vendor vdr;
+	private User vdr;
 	
 //	@ManyToMany(mappedBy = "products", cascade = CascadeType.ALL)
 //	@JsonProperty(access = Access.WRITE_ONLY)
@@ -56,7 +56,7 @@ public class Product {
 	}
 
 	public Product(String pname, String pdesc, String psize, int pqty, float pprice,
-			String pbrand, String papprove, Category cat, Vendor vdr, List<MyOrder> myorders) {
+			String pbrand, String papprove, Category cat, User vdr, List<MyOrder> myorders) {
 		super();
 		this.pname = pname;
 		this.pdesc = pdesc;
@@ -142,11 +142,11 @@ public class Product {
 		this.cat = cat;
 	}
 
-	public Vendor getVdr() {
+	public User getVdr() {
 		return vdr;
 	}
 
-	public void setVdr(Vendor vdr) {
+	public void setVdr(User vdr) {
 		this.vdr = vdr;
 	}
 
