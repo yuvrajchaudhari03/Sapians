@@ -57,6 +57,18 @@ public class UserService implements UserDetailsService
 		}
 		return userrepo.save(existinguser);
 	}
+	public User addWalletMoney(Integer paymentDone) {
+		String existinguserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+		User existinguser=userrepo.findByEmailAddress(existinguserEmail);
+
+		if(existinguser != null) {
+			float existingWallet = existinguser.getWallet() > 0 ? existinguser.getWallet() : 0;
+			existinguser.setWallet(existingWallet + paymentDone);
+			return userrepo.save(existinguser);
+		}
+		return null;
+	}
+
 
 	public boolean deleteUser(int u_id) {
 		userrepo.deleteById(u_id);
@@ -121,7 +133,9 @@ public class UserService implements UserDetailsService
 			user = userrepo.findByPhoneNumber(email);
 		if(user == null)
 			throw new UsernameNotFoundException(email + " not found.");
-		return new org.springframework.security.core.userdetails.User(user.getU_email(), user.getU_password(), getGrantedAuthority(user));
+		return user;
+//		return new User(user.getU_fname(), user.getU_lname(), user.getU_phone(), user.getU_address(),
+//				user.getU_email(), user.getU_password(), user.getWallet(), getGrantedAuthority(user));
 	}
 
 	private Collection<GrantedAuthority> getGrantedAuthority(User user){

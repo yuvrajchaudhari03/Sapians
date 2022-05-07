@@ -48,8 +48,14 @@ public class LoginService {
         if (null != authentication) {
             SecretKey key = Keys.hmacShaKeyFor(SecurityConstants.JWT_KEY.getBytes(StandardCharsets.UTF_8));
             String email = authentication.getName();
+
+            Integer user_id = null;
+            if(authentication.getPrincipal() instanceof User){
+                user_id = ((User) authentication.getPrincipal()).getU_id();
+            }
             String jwt = Jwts.builder().setIssuer("Sapien").setSubject("JWT Token")
                     .claim("u_email", email)
+                    .claim("u_id", user_id)
                     .claim("authorities", populateAuthorities(authentication.getAuthorities()))
                     .setIssuedAt(new Date())
                     .setExpiration(new Date((new Date()).getTime() + 30000000))
