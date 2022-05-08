@@ -91,6 +91,12 @@ public class UserController
 		return userservice.allUser();
 	}//Ok
 
+	@GetMapping("/getallvendor")
+	public List<User> allVendorUser()
+	{
+		return userservice.allVendor();
+	}
+
 	@PostMapping("/giveAuthority")
 	public ResponseEntity giveAuthority(@RequestBody GiveAuthorityModel giveAuthority){
 		try {

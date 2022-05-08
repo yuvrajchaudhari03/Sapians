@@ -112,6 +112,11 @@ public class UserService implements UserDetailsService
 		// TODO Auto-generated method stub
 		return userrepo.findAll();
 	}
+	public java.util.List<User> allVendor() {
+		// TODO Auto-generated method stub
+		return userrepo.findAllVendor();
+	}
+
 
 	public User loadUserByEmailOrPhone(String emailOrPhone){
 		User user = null;

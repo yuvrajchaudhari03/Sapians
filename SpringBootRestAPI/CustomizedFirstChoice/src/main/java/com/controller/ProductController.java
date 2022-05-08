@@ -3,6 +3,7 @@ package com.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.constants.Utilities;
 import com.service.FilesStorageService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ public class ProductController {
 
 	@Autowired
 	FilesStorageService storageService;
+
+	@Autowired
+	Utilities utilities;
 	
 	@GetMapping("/getallproducts")
 	public List<Product> getAllProducts() {
@@ -62,22 +66,16 @@ public class ProductController {
 		return pservice.getAllStitched().stream().filter(e -> e.getPqty()>0).collect(Collectors.toList());
 	}
 
-	@GetMapping("/viewbyvid")
-	public List<Product> getByVid(@RequestParam("v_id")int v_id){
-		return pservice.getByVendor(v_id);
+	@GetMapping("/byVendor/IS")
+	public List<Product> getByVid(){
+		Integer id = utilities.getCurrentUserId();
+		return pservice.getByVendor(id);
 	}
 
-//	@GetMapping("/vaddproduct")
-//	public int vaddproduct(@RequestParam("c_id")int c_id, @RequestParam("v_id") int v_id,
-//			@RequestParam("pname") String pname, @RequestParam("pdesc") String pdesc,
-//			@RequestParam("psize") String psize, @RequestParam("pbrand") String pbrand,
-//			@RequestParam("pprice") float pprice, @RequestParam("pqty") int pqty, @RequestParam("image_url") String image_url) throws Exception {
-//		return pservice.vaddproduct(c_id, "", pname, pdesc, psize, pbrand, pprice, pqty, image_url);
-//	}
-
-	@GetMapping("/viewoutofstock")
-	public List<Product> viewOutOfStock(@RequestParam("v_id") int v_id)
+	@GetMapping("/byVendor/OOS")
+	public List<Product> viewOutOfStock()
 	{
-		return pservice.viewOutOfStock(v_id);
+		Integer id = utilities.getCurrentUserId();
+		return pservice.viewOutOfStock(id);
 	}
 }

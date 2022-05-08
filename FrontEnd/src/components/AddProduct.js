@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom'
 import 'react-dropdown/style.css'
 import { Form } from 'react-bootstrap'
 import axios from 'axios'
+import authService from '../services/authService'
+import httpService from '../services/httpService'
+import { toast } from 'react-toastify'
 
 export default class AddProduct extends React.Component {
   constructor(props) {
@@ -115,16 +118,7 @@ export default class AddProduct extends React.Component {
   handleOption(e) {
     this.setState({ selectedOption: e.target.value })
   }
-  // convertImage = async (imageBlobUrl, imageName) => {
-  //     const formData = new FormData();
-  //     let blob = await fetch(imageBlobUrl).then((r) => r.blob());
-  //     var file = new File([blob], imageName);
-  //     formData.append("file", file);
-  //     console.log(formData);
-  //     return formData
-  //     // let res = await this.uploadImage(formData);
-  //     // return res.data;
-  // };
+
   async convertToFile(customerFabricImg, fabricImgType, fabricImgName) {
     if (fabricImgType === undefined) {
       return null
@@ -150,7 +144,7 @@ export default class AddProduct extends React.Component {
       const formData = new FormData()
       formData.append('file', fileImage)
       console.log(fileImage)
-      axios
+      httpService
         .post(
           process.env.REACT_APP_BASE_URL + '/upload_product_image',
           formData,
@@ -164,42 +158,37 @@ export default class AddProduct extends React.Component {
           console.log(res)
           this.setState({ p_image: res.data })
         })
-        .catch((err) => { })
+        .catch((err) => {
+          toast(err.response.data)
+        })
     }
   }
   checkCType = () => {
-    let a = this.state.cat.filter(cat => Number(cat.c_id) === Number(this.state.selectedOption))[0]
-    return (a!==undefined && a.c_type === 'RAW') ? true : false
+    let a = this.state.cat.filter(
+      (cat) => Number(cat.c_id) === Number(this.state.selectedOption),
+    )[0]
+    return a !== undefined && a.c_type === 'RAW' ? true : false
   }
   submitForm = async (e) => {
     e.preventDefault()
-    let sign = JSON.parse(localStorage.getItem('data1'))
-    await fetch(
-      process.env.REACT_APP_BASE_URL +
-      '/product/vaddproduct?c_id=' +
-      this.state.selectedOption +
-      '&v_id=' +
-      sign.v_id +
-      '&pname=' +
-      this.state.title +
-      '&pdesc=' +
-      this.state.describe +
-      '&psize=' +
-      this.state.size +
-      '&pbrand=' +
-      this.state.brand +
-      '&pprice=' +
-      this.state.price +
-      '&pqty=' +
-      this.state.qty +
-      '&image_url=' +
-      this.state.p_image,
-    )
-      .then((resp) => resp.json())
-      .then((data) => this.setState({ st: data, success: true }))
-      .catch((error) => {
-        console.log(error)
-      })
+    let sign = authService.getCurrentUser()
+    let data = {
+      pname: this.state.title,
+      pdesc: this.state.describe,
+      psize: this.state.size,
+      prating: 4,
+      pqty: this.state.qty,
+      pprice: this.state.price,
+      pbrand: this.state.brand,
+      imageUrl: this.state.p_image,
+      cat: {
+        c_id: this.state.selectedOption,
+      },
+    }
+    const url = process.env.REACT_APP_BASE_URL + '/product/addproduct'
+
+    let response = await httpService.post(url, data)
+    this.setState({ st: response.data, success: true })
     window.location.href = '/vendor'
   }
   componentDidMount() {
@@ -263,7 +252,7 @@ export default class AddProduct extends React.Component {
               onChange={this.handleChange}
             />
           </Form.Group>
-          {!this.checkCType() &&
+          {!this.checkCType() && (
             <Form.Group className="mb-2" controlId="formBasicEmail">
               <Form.Label> Size</Form.Label>
               <Form.Control
@@ -274,7 +263,7 @@ export default class AddProduct extends React.Component {
                 onChange={this.handleChange}
               />
             </Form.Group>
-          }
+          )}
           <Form.Group className="mb-2" controlId="formBasicEmail">
             <Form.Label> Brand</Form.Label>
             <Form.Control
@@ -294,7 +283,9 @@ export default class AddProduct extends React.Component {
               value={this.state.qty}
               onChange={this.handleChange}
             />
-            <div style={{color:"red"}}>{this.checkCType() && "*Above quaintity should be in meters"}</div>
+            <div style={{ color: 'red' }}>
+              {this.checkCType() && '*Above quaintity should be in meters'}
+            </div>
           </Form.Group>
           <Form.Group className="mb-2" controlId="formBasicEmail">
             <Form.Label> Price</Form.Label>
@@ -310,7 +301,7 @@ export default class AddProduct extends React.Component {
             <Form.Label>Product Image</Form.Label>
             <Form.Control type="file" onChange={this.onChangeImage} />
           </Form.Group>
-          <span style={{color: 'red'}}>*Upload Imgage within 2MB size</span>
+          <span style={{ color: 'red' }}>*Upload Imgage within 2MB size</span>
           {this.state.p_image !== null && this.state.p_image1 == undefined && (
             <div>
               <img
