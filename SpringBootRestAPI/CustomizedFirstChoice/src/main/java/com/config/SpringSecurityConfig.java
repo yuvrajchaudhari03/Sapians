@@ -70,6 +70,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/user/vendor").authenticated()
                 .antMatchers(HttpMethod.POST, "/user/addMoney").authenticated()
                 .antMatchers(HttpMethod.DELETE, "/user/*").hasAuthority(Role.ADMIN)
+                .antMatchers(HttpMethod.GET, "/product/byVendor/*").hasAuthority(Role.VENDOR)
+                .antMatchers(HttpMethod.POST, "/upload_product_image").hasAnyAuthority(Role.VENDOR, Role.ADMIN)
                 .antMatchers("/contactUs").permitAll()
                 .antMatchers(HttpMethod.GET,"/product/*").permitAll()
                 .antMatchers("/product/addproduct").hasAuthority(Role.VENDOR)

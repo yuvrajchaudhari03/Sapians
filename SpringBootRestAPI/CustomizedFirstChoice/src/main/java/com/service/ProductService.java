@@ -44,8 +44,8 @@ public class ProductService {
 	public List<Product> getAllStitched() {
 		return prepo.getAllStitched();
 	}
-	public List<Product> getByVendor(int u_id) {
-		return prepo.getByVid(u_id);
+	public List<Product> getByVendor(Integer id) {
+		return prepo.getByVid(id);
 	}
 	public boolean productStatusAction(int p_id,float pprice,int pqty,String action) 
 	{
